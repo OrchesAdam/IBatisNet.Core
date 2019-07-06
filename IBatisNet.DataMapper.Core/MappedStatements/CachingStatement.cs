@@ -30,6 +30,7 @@ using System.Collections;
 using System.Collections.Generic;
 #endif
 using System.Data;
+using System.Threading.Tasks;
 using IBatisNet.DataMapper.Commands;
 using IBatisNet.DataMapper.Configuration.Cache;
 using IBatisNet.DataMapper.Configuration.Statements;
@@ -261,6 +262,12 @@ namespace IBatisNet.DataMapper.MappedStatements
 
             return list;
         }
+
+        public Task<IList> ExecuteQueryForListAsync(ISqlMapSession session, object parameterObject, int skipResults, int maxResults)
+        {
+            throw new System.NotImplementedException();
+        }
+
         /// <summary>
         /// Executes the SQL and retuns all rows selected. This is exactly the same as
         /// calling ExecuteQueryForList(session, parameterObject, NO_SKIPPED_RESULTS, NO_MAXIMUM_RESULTS).
@@ -500,10 +507,10 @@ namespace IBatisNet.DataMapper.MappedStatements
         private CacheKey GetCacheKey(RequestScope request)
         {
             CacheKey cacheKey = new CacheKey();
-            int count = request.IDbCommand.Parameters.Count;
+            int count = request.DbCommand.Parameters.Count;
             for (int i = 0; i < count; i++)
             {
-                IDataParameter dataParameter = (IDataParameter)request.IDbCommand.Parameters[i];
+                IDataParameter dataParameter = (IDataParameter)request.DbCommand.Parameters[i];
                 if (dataParameter.Value != null)
                 {
                     cacheKey.Update(dataParameter.Value);
@@ -512,7 +519,7 @@ namespace IBatisNet.DataMapper.MappedStatements
 
             cacheKey.Update(_mappedStatement.Id);
             cacheKey.Update(_mappedStatement.SqlMap.DataSource.ConnectionString);
-            cacheKey.Update(request.IDbCommand.CommandText);
+            cacheKey.Update(request.DbCommand.CommandText);
 
             CacheModel cacheModel = _mappedStatement.Statement.CacheModel;
             if (!cacheModel.IsReadOnly && !cacheModel.IsSerializable)

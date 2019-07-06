@@ -26,6 +26,7 @@
 
 #region Imports
 using System.Collections;
+using System.Threading.Tasks;
 #if dotnet2
 using System.Collections.Generic;
 #endif
@@ -187,7 +188,15 @@ namespace IBatisNet.DataMapper.MappedStatements
 		/// <param name="maxResults">The maximum number of rows to return.</param>
 		/// <returns>A List of result objects.</returns>
 		IList ExecuteQueryForList( ISqlMapSession session, object parameterObject, int skipResults, int maxResults );
-
+        /// <summary>
+        /// Executes the SQL and retuns a subset of the rows selected with asynchronous.
+        /// </summary>
+        /// <param name="session"></param>
+        /// <param name="parameterObject"></param>
+        /// <param name="skipResults"></param>
+        /// <param name="maxResults"></param>
+        /// <returns></returns>
+        Task<IList> ExecuteQueryForListAsync( ISqlMapSession session, object parameterObject, int skipResults, int maxResults );
 		/// <summary>
 		/// Executes the SQL and retuns all rows selected. This is exactly the same as
 		/// calling ExecuteQueryForList(session, parameterObject, NO_SKIPPED_RESULTS, NO_MAXIMUM_RESULTS).

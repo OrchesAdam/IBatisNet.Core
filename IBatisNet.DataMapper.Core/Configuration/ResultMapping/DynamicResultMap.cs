@@ -111,7 +111,7 @@
 //        /// <value>
 //        /// 	<c>true</c> if this instance is initalized; otherwise, <c>false</c>.
 //        /// </value>
-//        public bool IsInitalized
+//        public bool IsInitialized
 //        {
 //            get { return _isInitalized; }
 //            set { _isInitalized = value; }

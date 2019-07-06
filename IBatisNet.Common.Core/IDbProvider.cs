@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using System.Data.Common;
 using System.Xml.Serialization;
 
 namespace IBatisNet.Common
@@ -206,25 +207,25 @@ namespace IBatisNet.Common
 		/// Create a connection object for this provider.
 		/// </summary>
 		/// <returns>An 'IDbConnection' object.</returns>
-		IDbConnection CreateConnection();
+		DbConnection CreateConnection();
 
 		/// <summary>
 		/// Create a command object for this provider.
 		/// </summary>
 		/// <returns>An 'IDbCommand' object.</returns>
-		IDbCommand CreateCommand();
+		DbCommand CreateCommand();
 
 		/// <summary>
 		/// Create a dataAdapter object for this provider.
 		/// </summary>
 		/// <returns>An 'IDbDataAdapter' object.</returns>
-		IDbDataAdapter CreateDataAdapter();
+		DataAdapter CreateDataAdapter();
 
 		/// <summary>
 		/// Create a IDataParameter object for this provider.
 		/// </summary>
 		/// <returns>An 'IDbDataParameter' object.</returns>
-		IDbDataParameter CreateDataParameter();
+		DbParameter CreateDataParameter();
 
         /// <summary>
         /// Create the CommandBuilder Type for this provider.

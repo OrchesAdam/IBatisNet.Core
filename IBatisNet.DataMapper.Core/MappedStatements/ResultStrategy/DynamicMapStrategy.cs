@@ -56,11 +56,11 @@
 //            }
 //            else
 //            {
-//                if (!resultMap.IsInitalized)
+//                if (!resultMap.IsInitialized)
 //                {
 //                    lock (resultMap) 
 //                    {
-//                        if (!resultMap.IsInitalized)
+//                        if (!resultMap.IsInitialized)
 //                        {
 //                            ResultPropertyCollection properties = ReaderAutoMapper.Build(
 //                               request.DataExchangeFactory,
@@ -68,7 +68,7 @@
 //                               ref resultObject);
 
 //                            resultMap.Properties.AddRange(properties);
-//                            resultMap.IsInitalized = true;
+//                            resultMap.IsInitialized = true;
 //                        }
 //                    }
 //                }
@@ -103,7 +103,7 @@
 //            // ds Statement.ResultsMap puis ds AutoMapStrategy faire comme AutoResultMap ds Java
 //            // tester si la request.CurrentResultMap [AutoResultMap (IResultMap)] est initialisée 
 //            // [if (allowRemapping || getResultMappings() == null) {initialize(rs);] java
-//            // si ( request.Statement.AllowRemapping || (request.CurrentResultMap as AutoResultMap).IsInitalized) ....
+//            // si ( request.Statement.AllowRemapping || (request.CurrentResultMap as AutoResultMap).IsInitialized) ....
 
 //            for (int index = 0; index < resultMap.Properties.Count; index++)
 //            {

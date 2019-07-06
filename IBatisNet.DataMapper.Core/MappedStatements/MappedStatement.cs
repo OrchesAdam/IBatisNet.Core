@@ -45,6 +45,7 @@ using IBatisNet.DataMapper.Scope;
 using IBatisNet.DataMapper.MappedStatements.PostSelectStrategy;
 using IBatisNet.DataMapper.Exceptions;
 using IBatisNet.DataMapper.TypeHandlers;
+using System.Threading.Tasks;
 
 #endregion
 
@@ -265,9 +266,9 @@ namespace IBatisNet.DataMapper.MappedStatements
         {
             dynamic resultObject = default(dynamic);
 
-            using (IDbCommand command = request.IDbCommand)
+            using (var command = request.DbCommand)
             {
-                IDataReader reader = command.ExecuteReader();
+                var reader = command.ExecuteReader();
                 try
                 {
                     while (reader.Read())
@@ -318,9 +319,9 @@ namespace IBatisNet.DataMapper.MappedStatements
         {
             object result = resultObject;
 
-            using (IDbCommand command = request.IDbCommand)
+            using (var command = request.DbCommand)
             {
-                IDataReader reader = command.ExecuteReader();
+                var reader = command.ExecuteReader();
                 try
                 {
                     while (reader.Read())
@@ -408,9 +409,9 @@ namespace IBatisNet.DataMapper.MappedStatements
         {
             T result = resultObject;
 
-            using (IDbCommand command = request.IDbCommand)
+            using (var command = request.DbCommand)
             {
-                IDataReader reader = command.ExecuteReader();
+                var reader = command.ExecuteReader();
                 try
                 {
                     while (reader.Read())
@@ -545,7 +546,7 @@ namespace IBatisNet.DataMapper.MappedStatements
         {
             IList list = null;
             
-            using (IDbCommand command = request.IDbCommand)
+            using (var command = request.DbCommand)
             {
                 if (_statement.ListClass == null)
                 {
@@ -556,7 +557,7 @@ namespace IBatisNet.DataMapper.MappedStatements
                     list = _statement.CreateInstanceOfListClass();
                 }
 
-                IDataReader reader = command.ExecuteReader();
+                var reader = command.ExecuteReader();
 
                 try
                 {
@@ -613,7 +614,7 @@ namespace IBatisNet.DataMapper.MappedStatements
         {
             IList list = resultObject;
 
-            using (IDbCommand command = request.IDbCommand)
+            using (IDbCommand command = request.DbCommand)
             {
                 if (resultObject==null)
                 {
@@ -628,6 +629,78 @@ namespace IBatisNet.DataMapper.MappedStatements
                 }
 
                 IDataReader reader = command.ExecuteReader();
+
+                try
+                { 
+                    do
+                    {
+                        if (rowDelegate == null)
+                        {
+                            while (reader.Read())
+                            {
+                                object obj = _resultStrategy.Process(request, ref reader, null);
+                                if (obj != BaseStrategy.SKIP)
+                                {
+                                    list.Add(obj);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            while (reader.Read())
+                            {
+                                object obj = _resultStrategy.Process(request, ref reader, null);
+                                rowDelegate(obj, parameterObject, list);
+                            }
+                        }
+                    }
+                    while (reader.NextResult());
+                }
+                catch
+                {
+                    throw;
+                }
+                finally
+                {
+                    reader.Close();
+                    reader.Dispose();
+                }
+
+                ExecutePostSelect(request);
+                RetrieveOutputParameters(request, session, command, parameterObject);
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// Executes the SQL and retuns a List of result objects.
+        /// </summary>
+        /// <param name="request">The request scope.</param>
+        /// <param name="session">The session used to execute the statement.</param>
+        /// <param name="parameterObject">The object used to set the parameters in the SQL.</param>
+        /// <param name="resultObject">A strongly typed collection of result objects.</param>
+        /// <param name="rowDelegate"></param>
+        /// <returns>A List of result objects.</returns>
+        internal async Task<IList> RunQueryForListAsync(RequestScope request, ISqlMapSession session, object parameterObject, IList resultObject, RowDelegate rowDelegate)
+        {
+            IList list = resultObject;
+
+            using (var command = request.DbCommand)
+            {
+                if (resultObject==null)
+                {
+                    if (_statement.ListClass == null)
+                    {
+                        list = new ArrayList();
+                    }
+                    else
+                    {
+                        list = _statement.CreateInstanceOfListClass();
+                    }
+                }
+
+                var reader = await command.ExecuteReaderAsync();
 
                 try
                 { 
@@ -763,7 +836,7 @@ namespace IBatisNet.DataMapper.MappedStatements
         {
             IList<T> list = null;
 
-            using (IDbCommand command = request.IDbCommand)
+            using (IDbCommand command = request.DbCommand)
             {
                 if (_statement.ListClass == null)
                 {
@@ -830,7 +903,7 @@ namespace IBatisNet.DataMapper.MappedStatements
         {
             IList<T> list = resultObject;
 
-            using (IDbCommand command = request.IDbCommand)
+            using (IDbCommand command = request.DbCommand)
             {
                 if (resultObject == null)
                 {
@@ -922,7 +995,7 @@ namespace IBatisNet.DataMapper.MappedStatements
 
             _preparedCommand.Create(request, session, this.Statement, parameterObject);
 
-            using (IDbCommand command = request.IDbCommand)
+            using (IDbCommand command = request.DbCommand)
             {
                 rows = command.ExecuteNonQuery();
 
@@ -966,7 +1039,7 @@ namespace IBatisNet.DataMapper.MappedStatements
             }
 
             _preparedCommand.Create(request, session, this.Statement, parameterObject);
-            using (IDbCommand command = request.IDbCommand)
+            using (IDbCommand command = request.DbCommand)
             {
                 if (_statement is Insert)
                 {
@@ -1064,7 +1137,7 @@ namespace IBatisNet.DataMapper.MappedStatements
         {
             IDictionary map = new Hashtable();
 
-            using (IDbCommand command = request.IDbCommand)
+            using (IDbCommand command = request.DbCommand)
             {
                IDataReader reader = command.ExecuteReader();
                try
@@ -1184,7 +1257,7 @@ namespace IBatisNet.DataMapper.MappedStatements
         {
             IDictionary<K, V> map = new Dictionary<K, V>();
 
-            using (IDbCommand command = request.IDbCommand)
+            using (IDbCommand command = request.DbCommand)
             {
                 IDataReader reader = command.ExecuteReader();
                 try
@@ -1287,6 +1360,15 @@ namespace IBatisNet.DataMapper.MappedStatements
             if (_statement.ParameterMap != null) buffer.Append(_statement.ParameterMap.Id);
 
             return buffer.ToString();
+        }
+
+        public Task<IList> ExecuteQueryForListAsync(ISqlMapSession session, object parameterObject, int skipResults, int maxResults)
+        {
+            RequestScope request = _statement.Sql.GetRequestScope(this, parameterObject, session);
+
+            _preparedCommand.Create(request, session, this.Statement, parameterObject);
+
+            return RunQueryForList(request, session, parameterObject, null, null);
         }
 
 

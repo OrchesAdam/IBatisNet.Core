@@ -112,7 +112,7 @@ namespace IBatisNet.DataMapper.Configuration.ResultMapping
         /// <value>
         /// 	<c>true</c> if this instance is initalized; otherwise, <c>false</c>.
         /// </value>
-        public bool IsInitalized
+        public bool IsInitialized
         {
             get { return _isInitalized; }
             set { _isInitalized = value; }
@@ -241,5 +241,205 @@ namespace IBatisNet.DataMapper.Configuration.ResultMapping
             }
         }
 
+    }
+
+    public class AutoResultMap<T> : IResultMap
+    {
+        [NonSerialized]
+        private bool _isInitialized = false;
+        [NonSerialized]
+        private readonly Type _resultClass = null;
+        [NonSerialized]
+        private readonly IFactory _resultClassFactory = null;
+        [NonSerialized]
+        private readonly ResultPropertyCollection _properties = new ResultPropertyCollection();
+        
+        [NonSerialized]
+        private IDataExchange _dataExchange = null;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AutoResultMap"/> class.
+        /// </summary>
+        /// <param name="resultClassFactory">The result class factory.</param>
+        /// <param name="dataExchange">The data exchange.</param>
+        public AutoResultMap(IFactory resultClassFactory, IDataExchange dataExchange)
+        {
+            _resultClass = typeof(T);
+            _resultClassFactory = resultClassFactory;
+            _dataExchange = dataExchange;
+        }
+        
+        #region IResultMap Members
+
+        /// <summary>
+        /// The GroupBy Properties.
+        /// </summary>
+        [XmlIgnore]
+        public StringCollection GroupByPropertyNames
+        {
+            get { throw new NotImplementedException("The property 'GroupByPropertyNames' is not implemented."); }
+        }
+        
+        /// <summary>
+        /// The collection of ResultProperty.
+        /// </summary>
+        [XmlIgnore]
+        public ResultPropertyCollection Properties
+        {
+            get { return _properties; }
+        }
+
+        /// <summary>
+        /// The GroupBy Properties.
+        /// </summary>
+        /// <value></value>
+        public ResultPropertyCollection GroupByProperties
+        {
+            get { throw new NotImplementedException("The property 'GroupByProperties' is not implemented."); }
+        }
+
+        /// <summary>
+        /// The collection of constructor parameters.
+        /// </summary>
+        [XmlIgnore]
+        public ResultPropertyCollection Parameters
+        {
+            get { throw new NotImplementedException("The property 'Parameters' is not implemented."); }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is initalized.
+        /// </summary>
+        /// <value>
+        /// 	<c>true</c> if this instance is initalized; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsInitialized
+        {
+            get => _isInitialized;
+            set => _isInitialized = value;
+        }
+
+        /// <summary>
+        /// Identifier used to identify the resultMap amongst the others.
+        /// </summary>
+        /// <value></value>
+        /// <example>GetProduct</example>
+        public string Id
+        {
+            get { return _resultClass.Name; }
+        }
+
+
+        /// <summary>
+        /// The output type class of the resultMap.
+        /// </summary>
+        /// <value></value>
+        public Type Class
+        {
+            get { return _resultClass; }
+        }
+
+
+        /// <summary>
+        /// Sets the IDataExchange
+        /// </summary>
+        /// <value></value>
+        public IDataExchange DataExchange
+        {
+            set { _dataExchange = value; }
+        }
+
+
+        /// <summary>
+        /// Create an instance Of result.
+        /// </summary>
+        /// <param name="parameters">An array of values that matches the number, order and type
+        /// of the parameters for this constructor.</param>
+        /// <returns>An object.</returns>
+        public object CreateInstanceOfResult(object[] parameters)
+        {
+            return CreateInstanceOfResultClass();
+        }
+
+        /// <summary>
+        /// Set the value of an object property.
+        /// </summary>
+        /// <param name="target">The object to set the property.</param>
+        /// <param name="property">The result property to use.</param>
+        /// <param name="dataBaseValue">The database value to set.</param>
+        public void SetValueOfProperty(ref object target, ResultProperty property, object dataBaseValue)
+        {
+            _dataExchange.SetData(ref target, property, dataBaseValue);
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="dataReader"></param>
+        /// <returns></returns>
+        public IResultMap ResolveSubMap(IDataReader dataReader)
+        {
+           return this;
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Clones this instance.
+        /// </summary>
+        /// <returns></returns>
+        public AutoResultMap<T> Clone()
+        {
+            return new AutoResultMap<T>(_resultClassFactory, _dataExchange);
+        }
+        
+        /// <summary>
+        /// Create an instance of result class.
+        /// </summary>
+        /// <returns>An object.</returns>
+        public T CreateInstanceOfResultClass()
+        {
+            if (_resultClass.IsPrimitive || _resultClass == typeof(string))
+            {
+                var typeCode = Type.GetTypeCode(_resultClass);
+                return default;
+            }
+            else
+            {
+                if (_resultClass.IsValueType)
+                {
+                    if (_resultClass == typeof(DateTime))
+                    {
+                        return default;
+                    }
+                    else if (_resultClass == typeof(decimal))
+                    {
+                        return default;
+                    }
+                    else if (_resultClass == typeof(Guid))
+                    {
+                        return default;
+                    }
+                    else if (_resultClass == typeof(TimeSpan))
+                    {
+                        return default;
+                    }
+#if dotnet2
+                    if (_resultClass.IsGenericType && typeof(Nullable<>).IsAssignableFrom(_resultClass.GetGenericTypeDefinition()))
+                    {
+                        return default;
+                    }
+#endif
+                    else
+                    {
+                        throw new NotImplementedException("Unable to instanciate value type");
+                    }
+
+                }
+                else
+                {
+                    return _resultClassFactory.CreateInstance<T>(null);
+                }
+            }
+        }
     }
 }

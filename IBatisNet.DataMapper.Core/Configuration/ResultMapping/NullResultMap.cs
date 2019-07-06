@@ -71,7 +71,7 @@ namespace IBatisNet.DataMapper.Configuration.ResultMapping
         /// <value>
         /// 	<c>true</c> if this instance is initalized; otherwise, <c>false</c>.
         /// </value>
-        public bool IsInitalized
+        public bool IsInitialized
         {
             get { throw new Exception("The method or operation is not implemented."); }
             set { throw new Exception("The method or operation is not implemented."); }

@@ -44,5 +44,6 @@ namespace IBatisNet.Common.Utilities.Objects
 		/// </remarks>
 		/// <returns>A new instance</returns>
 		object CreateInstance(object[] parameters);
+        T CreateInstance<T>(object[] parameters);
 	}
 }

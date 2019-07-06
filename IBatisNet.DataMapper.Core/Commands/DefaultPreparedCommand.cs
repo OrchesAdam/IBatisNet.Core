@@ -63,11 +63,11 @@ namespace IBatisNet.DataMapper.Commands
 		public void Create(RequestScope request, ISqlMapSession session, IStatement statement, object parameterObject )
 		{
 			// the IDbConnection & the IDbTransaction are assign in the CreateCommand 
-            request.IDbCommand = new DbCommandDecorator(session.CreateCommand(statement.CommandType), request);
+            request.DbCommand = new DbCommandDecorator(session.CreateCommand(statement.CommandType), request);
 			
-			request.IDbCommand.CommandText = request.PreparedStatement.PreparedSql;
+			request.DbCommand.CommandText = request.PreparedStatement.PreparedSql;
 
-			ApplyParameterMap( session, request.IDbCommand, request, statement, parameterObject  );
+			ApplyParameterMap( session, request.DbCommand, request, statement, parameterObject  );
 		}
 
 

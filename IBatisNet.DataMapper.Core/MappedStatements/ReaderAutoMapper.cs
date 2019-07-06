@@ -54,7 +54,21 @@ namespace IBatisNet.DataMapper.MappedStatements
         /// <param name="resultObject">The result object.</param>
 		public static ResultPropertyCollection Build(DataExchangeFactory dataExchangeFactory,
 		                        IDataReader reader,
-			                    ref object resultObject) 
+			                    ref object resultObject)
+        {
+            var properties = Build<object>(dataExchangeFactory, reader, ref resultObject);
+            return properties;
+        }
+
+        /// <summary>
+        /// Builds a <see cref="ResultPropertyCollection"/> for an <see cref="AutoResultMap"/>.
+        /// </summary>
+        /// <param name="dataExchangeFactory">The data exchange factory.</param>
+        /// <param name="reader">The reader.</param>
+        /// <param name="resultObject">The result object.</param>
+		public static ResultPropertyCollection Build<T>(DataExchangeFactory dataExchangeFactory,
+		                        IDataReader reader,
+			                    ref T resultObject) 
 		{
         	Type targetType = resultObject.GetType();
             ResultPropertyCollection properties = new ResultPropertyCollection();
@@ -62,10 +76,10 @@ namespace IBatisNet.DataMapper.MappedStatements
             try 
 			{
 				// Get all PropertyInfo from the resultObject properties
-				ReflectionInfo reflectionInfo = ReflectionInfo.GetInstance(targetType);
-				string[] membersName = reflectionInfo.GetWriteableMemberNames();
+				var reflectionInfo = ReflectionInfo.GetInstance(targetType);
+				var membersName = reflectionInfo.GetWriteableMemberNames();
 
-				Hashtable propertyMap = new Hashtable();
+				var propertyMap = new Hashtable();
 				int length = membersName.Length;
 				for (int i = 0; i < length; i++) 
 				{
@@ -76,18 +90,20 @@ namespace IBatisNet.DataMapper.MappedStatements
 
 				// Get all column Name from the reader
 				// and build a resultMap from with the help of the PropertyInfo[].
-				DataTable dataColumn = reader.GetSchemaTable();
+				var dataColumn = reader.GetSchemaTable();
+                if (dataColumn == null)
+                {
+                    return new ResultPropertyCollection();
+                }
 				int count = dataColumn.Rows.Count;
 				for (int i = 0; i < count; i++) 
 				{
-					string columnName = dataColumn.Rows[i][0].ToString();
-                    ISetAccessor matchedSetAccessor = propertyMap[columnName] as ISetAccessor;
+					var columnName = dataColumn.Rows[i][0].ToString();
+                    var matchedSetAccessor = propertyMap[columnName] as ISetAccessor;
 
-					ResultProperty property = new ResultProperty();
-					property.ColumnName = columnName;
-					property.ColumnIndex = i;
+                    var property = new ResultProperty {ColumnName = columnName, ColumnIndex = i};
 
-					if (resultObject is Hashtable) 
+                    if (resultObject is Hashtable) 
 					{
 						property.PropertyName = columnName;
                         properties.Add(property);
@@ -101,10 +117,11 @@ namespace IBatisNet.DataMapper.MappedStatements
 						{
 							propertyType = ObjectProbe.GetMemberTypeForSetter(resultObject, columnName);
 						}
-						catch
-						{
-						}
-					}
+                        catch
+                        {
+                            // ignored
+                        }
+                    }
 					else
 					{
                         propertyType = matchedSetAccessor.MemberType;
@@ -134,6 +151,5 @@ namespace IBatisNet.DataMapper.MappedStatements
             
             return properties;
 		}
-
 	}
 }

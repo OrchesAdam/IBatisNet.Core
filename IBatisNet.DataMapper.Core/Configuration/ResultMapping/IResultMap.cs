@@ -90,7 +90,7 @@ namespace IBatisNet.DataMapper.Configuration.ResultMapping
         /// 	<c>true</c> if this instance is initalized; otherwise, <c>false</c>.
         /// </value>
         [XmlIgnore]
-        bool IsInitalized { get; set; }
+        bool IsInitialized { get; set; }
 
 
         /// <summary>

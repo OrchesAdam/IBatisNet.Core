@@ -33,6 +33,7 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Data;
 using System.Text;
+using System.Threading.Tasks;
 using IBatisNet.Common;
 using IBatisNet.Common.Utilities;
 using IBatisNet.Common.Utilities.Objects;
@@ -851,6 +852,49 @@ namespace IBatisNet.DataMapper
 			return list;
 		}
 
+        /// <summary>
+        /// Executes the SQL and retuns all rows selected.
+        /// <p/>
+        ///  The parameter object is generally used to supply the input
+        /// data for the WHERE clause parameter(s) of the SELECT statement.
+        /// </summary>
+        /// <param name="statementName">The name of the sql statement to execute.</param>
+        /// <param name="parameterObject">The object used to set the parameters in the SQL.</param>
+        /// <param name="skipResults">The number of rows to skip over.</param>
+        /// <param name="maxResults">The maximum number of rows to return.</param>
+        /// <returns>A List of result objects.</returns>
+        public async Task<IList> QueryForListAsync(string statementName, object parameterObject, int skipResults, int maxResults)	
+        {
+            bool isSessionLocal = false;
+            ISqlMapSession session = _sessionStore.LocalSession;
+            IList list;
+ 
+            if (session == null) 
+            {
+                session = CreateSqlMapSession();
+                isSessionLocal = true;
+            }
+
+            try 
+            {
+                IMappedStatement statement = GetMappedStatement(statementName);
+                list = await statement.ExecuteQueryForListAsync(session, parameterObject, skipResults, maxResults);
+            } 
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                if ( isSessionLocal )
+                {
+                    session.CloseConnection();
+                }
+            }
+
+            return list;
+        }
+
 		
 		/// <summary>
 		/// Executes a Sql SELECT statement that returns data to populate
@@ -1166,9 +1210,9 @@ namespace IBatisNet.DataMapper
                 RequestScope request = statement.Statement.Sql.GetRequestScope(statement, parameterObject, session);
                 statement.PreparedCommand.Create(request, session, statement.Statement, parameterObject);
 
-                using (request.IDbCommand)
+                using (request.DbCommand)
                 {
-                    dataTable.Load(request.IDbCommand.ExecuteReader());
+                    dataTable.Load(request.DbCommand.ExecuteReader());
 
                 }
 

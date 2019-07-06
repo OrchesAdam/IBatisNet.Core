@@ -28,6 +28,7 @@
 
 using System.Collections;
 using System.Data;
+using System.Data.Common;
 using System.Runtime.CompilerServices;
 using IBatisNet.DataMapper;
 using IBatisNet.DataMapper.Configuration.ParameterMapping;
@@ -51,7 +52,6 @@ namespace IBatisNet.DataMapper.Scope
         private ErrorContext _errorContext = null;
         private ParameterMap _parameterMap = null;
         private PreparedStatement _preparedStatement = null;
-        private IDbCommand _command = null;
         private Queue _selects = new Queue();
         bool _rowDataFound = false;
         private static long _nextId = 0;
@@ -126,13 +126,9 @@ namespace IBatisNet.DataMapper.Scope
         }
 
         /// <summary>
-        ///  The <see cref="IDbCommand"/> to execute
+        ///  The <see cref="DbCommand"/> to execute
         /// </summary>
-        public IDbCommand IDbCommand
-        {
-            set { _command = value; }
-            get { return _command; }
-        }
+        public DbCommand DbCommand { set; get; } = null;
 
         /// <summary>
         ///  Indicate if the statement have find data

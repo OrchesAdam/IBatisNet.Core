@@ -24,6 +24,8 @@
 #endregion
 
 using System.Data;
+using System.Data.Common;
+using System.Threading.Tasks;
 using IBatisNet.DataMapper.Scope;
 
 namespace IBatisNet.DataMapper.MappedStatements.ResultStrategy
@@ -40,6 +42,27 @@ namespace IBatisNet.DataMapper.MappedStatements.ResultStrategy
         /// <param name="request">The request.</param>
         /// <param name="reader">The reader.</param>
         /// <param name="resultObject">The result object.</param>
-        object Process(RequestScope request, ref IDataReader reader, object resultObject);
+        object Process(RequestScope request, ref DbDataReader reader, object resultObject);
+        /// <summary>
+        /// Processes the specified <see cref="IDataReader"/>.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="reader">The reader.</param>
+        /// <param name="resultObject">The result object.</param>
+        T Process<T>(RequestScope request, ref DbDataReader reader, T resultObject);
+        /// <summary>
+        /// Processes the specified <see cref="IDataReader"/>.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="reader">The reader.</param>
+        /// <param name="resultObject">The result object.</param>
+        (object result,IDataReader reader) Process(RequestScope request, DbDataReader reader, object resultObject);
+        /// <summary>
+        /// Processes the specified <see cref="IDataReader"/>.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="reader">The reader.</param>
+        /// <param name="resultObject">The result object.</param>
+        (T result,IDataReader reader) Process<T>(RequestScope request, DbDataReader reader, T resultObject);
     }
 }

@@ -57,11 +57,11 @@ namespace IBatisNet.DataMapper.MappedStatements.ResultStrategy
                 outObject = resultMap.CreateInstanceOfResultClass();
             }
 
-            if (!resultMap.IsInitalized)
+            if (!resultMap.IsInitialized)
             { 
                 lock(resultMap)
                 {
-                    if (!resultMap.IsInitalized)
+                    if (!resultMap.IsInitialized)
                     {
                         // Create a ResultProperty
                         ResultProperty property = new ResultProperty();
@@ -72,7 +72,7 @@ namespace IBatisNet.DataMapper.MappedStatements.ResultStrategy
 
                         resultMap.Properties.Add(property);
                         resultMap.DataExchange = request.DataExchangeFactory.GetDataExchangeForClass(typeof(int));// set the PrimitiveDataExchange
-                        resultMap.IsInitalized = true;
+                        resultMap.IsInitialized = true;
                     }
                 }
             }
